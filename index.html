@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kotak — Ubah Link Jadi Kode QR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          sans: ['Inter', 'sans-serif'],
+        },
+        colors: {
+          ink: '#0F241A',
+          forest: '#1B5E3F',
+          leaf: '#3FA66E',
+          leafdark: '#2C7E56',
+          mint: '#EAF4EC',
+          paper: '#FBFAF6',
+          line: '#DCE8DF',
+        },
+      },
+    },
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { background: #FBFAF6; }
+  .dotgrid {
+    background-image: radial-gradient(#DCE8DF 1.4px, transparent 1.4px);
+    background-size: 16px 16px;
+  }
+  .shape-btn.active {
+    border-color: #1B5E3F;
+    background: #1B5E3F;
+    box-shadow: 0 0 0 3px rgba(27,94,63,0.12);
+  }
+  .shape-btn.active .mini rect,
+  .shape-btn.active .mini circle,
+  .shape-btn.active .mini polygon { fill: #FBFAF6; }
+  .swatch { transition: transform .12s ease; }
+  .swatch:hover { transform: translateY(-2px); }
+  .swatch.active { outline: 2px solid #0F241A; outline-offset: 2px; }
+  #qrCanvas { image-rendering: crisp-edges; }
+  .fade-panel { animation: fadeIn .5s ease both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity:1; transform:none;} }
+</style>
+</head>
+<body class="font-sans text-ink antialiased">
+
+<!-- NAV -->
+<header class="sticky top-0 z-30 bg-paper/90 backdrop-blur border-b border-line">
+  <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-2.5">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+        <rect x="1" y="1" width="9" height="9" rx="2" stroke="#1B5E3F" stroke-width="2"/>
+        <rect x="16" y="1" width="9" height="9" rx="2" stroke="#1B5E3F" stroke-width="2"/>
+        <rect x="1" y="16" width="9" height="9" rx="2" stroke="#1B5E3F" stroke-width="2"/>
+        <rect x="17.5" y="17.5" width="6" height="6" rx="1.4" fill="#3FA66E"/>
+      </svg>
+      <span class="font-display font-semibold text-lg tracking-tight">Kotak</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-8 text-sm text-ink/70">
+      <a href="#fitur" class="hover:text-ink transition">Fitur</a>
+      <a href="#cara-kerja" class="hover:text-ink transition">Cara Kerja</a>
+    </nav>
+    <a href="#generator" class="inline-flex items-center rounded-full bg-forest text-paper text-sm font-medium px-4 py-2 hover:bg-leafdark transition">
+      Coba Sekarang
+    </a>
+  </div>
+</header>
+
+<!-- HERO / GENERATOR -->
+<section id="top" class="max-w-6xl mx-auto px-6 pt-14 pb-6">
+  <div class="max-w-2xl">
+    <p class="text-sm font-medium text-leafdark mb-3">Generator kode QR</p>
+    <h1 class="font-display text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.08]">
+      Ubah tautan jadi kode QR yang enak dipandang.
+    </h1>
+    <p class="mt-4 text-lg text-ink/70 leading-relaxed">
+      Tempel link apa saja, atur bentuk dan warnanya sesuka hati, lalu unduh — langsung dari peramban, tanpa watermark.
+    </p>
+  </div>
+</section>
+
+<section id="generator" class="max-w-6xl mx-auto px-6 pb-20">
+  <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 items-start">
+
+    <!-- CONTROLS -->
+    <div class="bg-white border border-line rounded-3xl p-6 sm:p-8">
+
+      <label class="block text-sm font-medium text-ink/80 mb-2" for="urlInput">Link tujuan</label>
+      <input id="urlInput" type="text" placeholder="https://contohtoko.com/menu"
+        class="w-full rounded-xl border border-line bg-paper px-4 py-3 text-ink placeholder:text-ink/35 focus:outline-none focus:ring-2 focus:ring-leaf/50 focus:border-leaf transition" />
+
+      <div class="mt-7">
+        <p class="text-sm font-medium text-ink/80 mb-3">Bentuk QR</p>
+        <div class="grid grid-cols-4 gap-3" id="shapeGroup">
+
+          <button data-shape="classic" class="shape-btn active border border-line rounded-xl py-3 flex flex-col items-center gap-2 hover:border-forest/50 transition">
+            <svg class="mini" width="34" height="34" viewBox="0 0 34 34">
+              <rect x="2" y="2" width="8" height="8" fill="#0F241A"/><rect x="24" y="2" width="8" height="8" fill="#0F241A"/>
+              <rect x="2" y="24" width="8" height="8" fill="#0F241A"/><rect x="14" y="2" width="6" height="6" fill="#0F241A"/>
+              <rect x="2" y="14" width="6" height="6" fill="#0F241A"/><rect x="14" y="14" width="6" height="6" fill="#0F241A"/>
+              <rect x="24" y="14" width="6" height="6" fill="#0F241A"/><rect x="14" y="24" width="6" height="6" fill="#0F241A"/>
+            </svg>
+            <span class="text-xs text-ink/70">Klasik</span>
+          </button>
+
+          <button data-shape="rounded" class="shape-btn border border-line rounded-xl py-3 flex flex-col items-center gap-2 hover:border-forest/50 transition">
+            <svg class="mini" width="34" height="34" viewBox="0 0 34 34">
+              <rect x="2" y="2" width="8" height="8" rx="3" fill="#0F241A"/><rect x="24" y="2" width="8" height="8" rx="3" fill="#0F241A"/>
+              <rect x="2" y="24" width="8" height="8" rx="3" fill="#0F241A"/><rect x="14" y="2" width="6" height="6" rx="2.5" fill="#0F241A"/>
+              <rect x="2" y="14" width="6" height="6" rx="2.5" fill="#0F241A"/><rect x="14" y="14" width="6" height="6" rx="2.5" fill="#0F241A"/>
+              <rect x="24" y="14" width="6" height="6" rx="2.5" fill="#0F241A"/><rect x="14" y="24" width="6" height="6" rx="2.5" fill="#0F241A"/>
+            </svg>
+            <span class="text-xs text-ink/70">Membulat</span>
+          </button>
+
+          <button data-shape="dots" class="shape-btn border border-line rounded-xl py-3 flex flex-col items-center gap-2 hover:border-forest/50 transition">
+            <svg class="mini" width="34" height="34" viewBox="0 0 34 34">
+              <circle cx="6" cy="6" r="4" fill="#0F241A"/><circle cx="28" cy="6" r="4" fill="#0F241A"/>
+              <circle cx="6" cy="28" r="4" fill="#0F241A"/><circle cx="17" cy="5" r="3" fill="#0F241A"/>
+              <circle cx="5" cy="17" r="3" fill="#0F241A"/><circle cx="17" cy="17" r="3" fill="#0F241A"/>
+              <circle cx="28" cy="17" r="3" fill="#0F241A"/><circle cx="17" cy="28" r="3" fill="#0F241A"/>
+            </svg>
+            <span class="text-xs text-ink/70">Titik</span>
+          </button>
+
+          <button data-shape="classy" class="shape-btn border border-line rounded-xl py-3 flex flex-col items-center gap-2 hover:border-forest/50 transition">
+            <svg class="mini" width="34" height="34" viewBox="0 0 34 34">
+              <rect x="2" y="2" width="8" height="8" rx="3" fill="#0F241A"/><rect x="24" y="2" width="8" height="8" rx="3" fill="#0F241A"/>
+              <rect x="2" y="24" width="8" height="8" rx="3" fill="#0F241A"/>
+              <polygon points="17,1.5 20.5,5 17,8.5 13.5,5" fill="#0F241A"/>
+              <polygon points="5,13.5 8.5,17 5,20.5 1.5,17" fill="#0F241A"/>
+              <polygon points="17,13.5 20.5,17 17,20.5 13.5,17" fill="#0F241A"/>
+              <polygon points="28,13.5 31.5,17 28,20.5 24.5,17" fill="#0F241A"/>
+              <polygon points="17,24.5 20.5,28 17,31.5 13.5,28" fill="#0F241A"/>
+            </svg>
+            <span class="text-xs text-ink/70">Elegan</span>
+          </button>
+
+        </div>
+      </div>
+
+      <div class="mt-7">
+        <p class="text-sm font-medium text-ink/80 mb-3">Warna kode</p>
+        <div class="flex flex-wrap items-center gap-3" id="colorGroup">
+          <button data-color="#0F241A" class="swatch active w-8 h-8 rounded-full border border-line" style="background:#0F241A"></button>
+          <button data-color="#1B5E3F" class="swatch w-8 h-8 rounded-full border border-line" style="background:#1B5E3F"></button>
+          <button data-color="#3FA66E" class="swatch w-8 h-8 rounded-full border border-line" style="background:#3FA66E"></button>
+          <button data-color="#0D6E6E" class="swatch w-8 h-8 rounded-full border border-line" style="background:#0D6E6E"></button>
+          <button data-color="#245C36" class="swatch w-8 h-8 rounded-full border border-line" style="background:#245C36"></button>
+          <label class="relative w-8 h-8 rounded-full border border-dashed border-ink/30 cursor-pointer flex items-center justify-center text-ink/40 text-xs overflow-hidden">
+            <input id="customColor" type="color" value="#1B5E3F" class="absolute inset-0 opacity-0 cursor-pointer" />
+            +
+          </label>
+        </div>
+
+        <label class="flex items-center gap-2 mt-4 text-sm text-ink/70 cursor-pointer select-none">
+          <input id="gradientToggle" type="checkbox" class="accent-forest w-4 h-4" />
+          Gunakan gradasi warna
+        </label>
+      </div>
+
+      <div class="mt-7">
+        <p class="text-sm font-medium text-ink/80 mb-3">Latar belakang</p>
+        <div class="flex items-center gap-3" id="bgGroup">
+          <button data-bg="#FFFFFF" class="bg-btn active px-3.5 py-2 rounded-lg border border-line text-sm hover:border-forest/50 transition">Putih</button>
+          <button data-bg="#EAF4EC" class="bg-btn px-3.5 py-2 rounded-lg border border-line text-sm hover:border-forest/50 transition">Hijau muda</button>
+          <button data-bg="transparent" class="bg-btn px-3.5 py-2 rounded-lg border border-line text-sm hover:border-forest/50 transition">Transparan</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="lg:sticky lg:top-24">
+      <div class="relative rounded-3xl bg-mint/60 dotgrid border border-line p-8 sm:p-10 flex flex-col items-center">
+        <div class="absolute -inset-6 rounded-[2rem] bg-leaf/10 blur-2xl -z-10"></div>
+        <div class="fade-panel bg-white rounded-2xl p-4 shadow-[0_1px_2px_rgba(15,36,26,0.04),0_16px_40px_-16px_rgba(15,36,26,0.18)]">
+          <canvas id="qrCanvas" class="rounded-xl" style="width:260px;height:260px;"></canvas>
+        </div>
+        <p class="mt-5 text-sm text-ink/55 text-center" id="previewLabel">Pratinjau langsung — akan berubah saat kamu mengatur bentuk dan warna</p>
+        <button id="downloadBtn" class="mt-6 inline-flex items-center gap-2 rounded-full bg-forest text-paper text-sm font-medium px-5 py-2.5 hover:bg-leafdark transition">
+          Unduh PNG
+        </button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="fitur" class="bg-mint/50 border-y border-line">
+  <div class="max-w-6xl mx-auto px-6 py-16">
+    <h2 class="font-display text-2xl sm:text-3xl font-semibold tracking-tight max-w-md">Kenapa pakai Kotak</h2>
+    <div class="grid sm:grid-cols-3 gap-6 mt-10">
+
+      <div class="bg-white rounded-2xl border border-line p-6">
+        <div class="w-9 h-9 rounded-lg bg-forest/10 flex items-center justify-center mb-4">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1L2 10h6l-1 7 7-9h-6l1-7z" fill="#1B5E3F"/></svg>
+        </div>
+        <h3 class="font-display font-semibold">Lihat hasilnya seketika</h3>
+        <p class="text-sm text-ink/65 mt-2 leading-relaxed">Setiap perubahan bentuk atau warna langsung tampil di pratinjau — tidak perlu klik generate berulang kali.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-line p-6">
+        <div class="w-9 h-9 rounded-lg bg-forest/10 flex items-center justify-center mb-4">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="3" fill="#1B5E3F"/><rect x="1" y="1" width="6" height="6" rx="1.5" fill="#1B5E3F"/><rect x="11" y="11" width="6" height="6" rx="1.5" fill="#1B5E3F"/>
+          </svg>
+        </div>
+        <h3 class="font-display font-semibold">Empat gaya, warna bebas</h3>
+        <p class="text-sm text-ink/65 mt-2 leading-relaxed">Dari kotak klasik sampai titik bulat yang lebih lembut, padukan dengan warna hijau favorit atau warna brand sendiri.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-line p-6">
+        <div class="w-9 h-9 rounded-lg bg-forest/10 flex items-center justify-center mb-4">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1v10M5 8l4 4 4-4M2 15h14" stroke="#1B5E3F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 class="font-display font-semibold">Unduh resolusi tinggi</h3>
+        <p class="text-sm text-ink/65 mt-2 leading-relaxed">Hasil PNG tajam, siap ditempel di kemasan, poster, atau kartu nama tanpa pecah.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="cara-kerja" class="max-w-6xl mx-auto px-6 py-16">
+  <h2 class="font-display text-2xl sm:text-3xl font-semibold tracking-tight max-w-md">Cara kerja</h2>
+  <div class="grid sm:grid-cols-3 gap-8 mt-10">
+    <div>
+      <span class="font-display text-sm text-leafdark">01</span>
+      <h3 class="font-display font-semibold mt-2">Tempel tautan</h3>
+      <p class="text-sm text-ink/65 mt-2 leading-relaxed">Masukkan link website, menu, atau profil kamu di kolom yang tersedia.</p>
+    </div>
+    <div>
+      <span class="font-display text-sm text-leafdark">02</span>
+      <h3 class="font-display font-semibold mt-2">Atur tampilan</h3>
+      <p class="text-sm text-ink/65 mt-2 leading-relaxed">Pilih bentuk modul dan warna yang cocok dengan gaya brand kamu.</p>
+    </div>
+    <div>
+      <span class="font-display text-sm text-leafdark">03</span>
+      <h3 class="font-display font-semibold mt-2">Unduh & pakai</h3>
+      <p class="text-sm text-ink/65 mt-2 leading-relaxed">Simpan sebagai gambar PNG dan tempel di mana saja kamu butuhkan.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="border-t border-line">
+  <div class="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+    <span class="font-display font-semibold text-sm">Kotak</span>
+    <p class="text-sm text-ink/50">Buat kode QR langsung dari peramban, tanpa kirim data ke server mana pun.</p>
+  </div>
+</footer>
+
+<script>
+  const state = {
+    text: '',
+    shape: 'classic',
+    color: '#0F241A',
+    gradient: false,
+    bg: '#FFFFFF',
+  };
+
+  const shapeStyles = {
+    classic: { dot: 'square',  corner: 'square'  },
+    rounded: { dot: 'rounded', corner: 'rounded' },
+    dots:    { dot: 'circle',  corner: 'circle'  },
+    classy:  { dot: 'diamond', corner: 'rounded' },
+  };
+
+  function roundRectPath(ctx, x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function shade(hex, percent) {
+    const f = parseInt(hex.slice(1), 16);
+    const t = percent < 0 ? 0 : 255;
+    const p = Math.abs(percent) / 100;
+    const R = f >> 16, G = (f >> 8) & 0x00FF, B = f & 0x0000FF;
+    const val = 0x1000000 +
+      (Math.round((t - R) * p) + R) * 0x10000 +
+      (Math.round((t - G) * p) + G) * 0x100 +
+      (Math.round((t - B) * p) + B);
+    return '#' + val.toString(16).slice(1);
+  }
+
+  function drawModule(ctx, x, y, size, style) {
+    const pad = style === 'square' ? 0 : size * 0.08;
+    switch (style) {
+      case 'square':
+        ctx.fillRect(x, y, size, size);
+        break;
+      case 'rounded':
+        roundRectPath(ctx, x + pad, y + pad, size - 2 * pad, size - 2 * pad, size * 0.32);
+        ctx.fill();
+        break;
+      case 'circle':
+        ctx.beginPath();
+        ctx.arc(x + size / 2, y + size / 2, (size - 2 * pad) / 2, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+      case 'diamond':
+        ctx.beginPath();
+        ctx.moveTo(x + size / 2, y + pad);
+        ctx.lineTo(x + size - pad, y + size / 2);
+        ctx.lineTo(x + size / 2, y + size - pad);
+        ctx.lineTo(x + pad, y + size / 2);
+        ctx.closePath();
+        ctx.fill();
+        break;
+    }
+  }
+
+  function drawFinder(ctx, x, y, m, style) {
+    const total = m * 7;
+    const cx = x + total / 2, cy = y + total / 2;
+    ctx.save();
+    if (style === 'square') {
+      ctx.lineJoin = 'miter';
+      ctx.lineWidth = m;
+      ctx.strokeRect(x + m / 2, y + m / 2, total - m, total - m);
+      ctx.fillRect(x + 2 * m, y + 2 * m, 3 * m, 3 * m);
+    } else if (style === 'rounded') {
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = m;
+      roundRectPath(ctx, x + m, y + m, total - 2 * m, total - 2 * m, m * 1.5);
+      ctx.stroke();
+      roundRectPath(ctx, x + 2 * m, y + 2 * m, 3 * m, 3 * m, m * 0.9);
+      ctx.fill();
+    } else if (style === 'circle') {
+      ctx.lineWidth = m;
+      ctx.beginPath();
+      ctx.arc(cx, cy, (total - m) / 2, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy, 1.5 * m, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function render() {
+    const canvas = document.getElementById('qrCanvas');
+    const ctx = canvas.getContext('2d');
+    const px = 720;
+    canvas.width = px;
+    canvas.height = px;
+
+    const text = state.text.trim() || 'https://kotak.app';
+    const qr = qrcode(0, 'Q');
+    qr.addData(text);
+    qr.make();
+    const count = qr.getModuleCount();
+    const margin = 3.2;
+    const total = count + margin * 2;
+    const m = px / total;
+
+    ctx.clearRect(0, 0, px, px);
+    roundRectPath(ctx, 0, 0, px, px, px * 0.045);
+    ctx.clip();
+
+    if (state.bg !== 'transparent') {
+      ctx.fillStyle = state.bg;
+      ctx.fillRect(0, 0, px, px);
+    }
+
+    let fill = state.color;
+    if (state.gradient) {
+      const g = ctx.createLinearGradient(0, 0, px, px);
+      g.addColorStop(0, shade(state.color, 22));
+      g.addColorStop(1, shade(state.color, -22));
+      fill = g;
+    }
+    ctx.fillStyle = fill;
+
+    const style = shapeStyles[state.shape];
+    const isFinderZone = (r, c) =>
+      (r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7);
+
+    for (let r = 0; r < count; r++) {
+      for (let c = 0; c < count; c++) {
+        if (isFinderZone(r, c)) continue;
+        if (qr.isDark(r, c)) {
+          drawModule(ctx, (c + margin) * m, (r + margin) * m, m, style.dot);
+        }
+      }
+    }
+
+    [[0, 0], [0, count - 7], [count - 7, 0]].forEach(([r, c]) => {
+      drawFinder(ctx, (c + margin) * m, (r + margin) * m, m, style.corner);
+    });
+  }
+
+  // wire up controls
+  document.getElementById('urlInput').addEventListener('input', (e) => {
+    state.text = e.target.value;
+    render();
+  });
+
+  document.querySelectorAll('.shape-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.shape-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.shape = btn.dataset.shape;
+      render();
+    });
+  });
+
+  document.querySelectorAll('#colorGroup .swatch').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#colorGroup .swatch').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.color = btn.dataset.color;
+      document.getElementById('customColor').value = btn.dataset.color;
+      render();
+    });
+  });
+
+  document.getElementById('customColor').addEventListener('input', (e) => {
+    document.querySelectorAll('#colorGroup .swatch').forEach((b) => b.classList.remove('active'));
+    state.color = e.target.value;
+    render();
+  });
+
+  document.getElementById('gradientToggle').addEventListener('change', (e) => {
+    state.gradient = e.target.checked;
+    render();
+  });
+
+  document.querySelectorAll('.bg-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.bg-btn').forEach((b) => b.classList.remove('active', 'border-forest'));
+      btn.classList.add('active', 'border-forest');
+      state.bg = btn.dataset.bg;
+      render();
+    });
+  });
+
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    const canvas = document.getElementById('qrCanvas');
+    const link = document.createElement('a');
+    link.download = 'kotak-qr.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+
+  render();
+</script>
+
+</body>
+</html>
