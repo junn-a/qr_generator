@@ -47,7 +47,14 @@
   .shape-btn.active .mini polygon { fill: #FBFAF6; }
   .swatch { transition: transform .12s ease; }
   .swatch:hover { transform: translateY(-2px); }
-  .swatch.active { outline: 2px solid #0F241A; outline-offset: 2px; }
+  .swatch.active,
+  .bg-swatch.active,
+  .frame-swatch.active { outline: 2px solid #0F241A; outline-offset: 2px; }
+  .mode-btn.active {
+    border-color: #1B5E3F;
+    background: #1B5E3F;
+    color: #FBFAF6;
+  }
   #qrCanvas { image-rendering: crisp-edges; }
   .fade-panel { animation: fadeIn .5s ease both; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity:1; transform:none;} }
@@ -99,6 +106,14 @@
       <label class="block text-sm font-medium text-ink/80 mb-2" for="urlInput">Link tujuan</label>
       <input id="urlInput" type="text" placeholder="https://contohtoko.com/menu"
         class="w-full rounded-xl border border-line bg-paper px-4 py-3 text-ink placeholder:text-ink/35 focus:outline-none focus:ring-2 focus:ring-leaf/50 focus:border-leaf transition" />
+
+      <div class="mt-7">
+        <p class="text-sm font-medium text-ink/80 mb-3">Gaya tampilan</p>
+        <div class="flex gap-3" id="modeGroup">
+          <button data-mode="plain" class="mode-btn active flex-1 rounded-xl border border-line py-2.5 text-sm font-medium hover:border-forest/50 transition">Polos</button>
+          <button data-mode="framed" class="mode-btn flex-1 rounded-xl border border-line py-2.5 text-sm font-medium hover:border-forest/50 transition">Bingkai + label</button>
+        </div>
+      </div>
 
       <div class="mt-7">
         <p class="text-sm font-medium text-ink/80 mb-3">Bentuk QR</p>
@@ -170,13 +185,37 @@
         </label>
       </div>
 
-      <div class="mt-7">
-        <p class="text-sm font-medium text-ink/80 mb-3">Latar belakang</p>
-        <div class="flex items-center gap-3" id="bgGroup">
-          <button data-bg="#FFFFFF" class="bg-btn active px-3.5 py-2 rounded-lg border border-line text-sm hover:border-forest/50 transition">Putih</button>
-          <button data-bg="#EAF4EC" class="bg-btn px-3.5 py-2 rounded-lg border border-line text-sm hover:border-forest/50 transition">Hijau muda</button>
-          <button data-bg="transparent" class="bg-btn px-3.5 py-2 rounded-lg border border-line text-sm hover:border-forest/50 transition">Transparan</button>
+      <div class="mt-7" id="bgSection">
+        <p class="text-sm font-medium text-ink/80 mb-3">Warna latar</p>
+        <div class="flex flex-wrap items-center gap-3" id="bgGroup">
+          <button data-bg="#FFFFFF" class="bg-swatch active w-8 h-8 rounded-full border border-line" style="background:#FFFFFF"></button>
+          <button data-bg="#EAF4EC" class="bg-swatch w-8 h-8 rounded-full border border-line" style="background:#EAF4EC"></button>
+          <button data-bg="transparent" class="bg-swatch w-8 h-8 rounded-full border border-dashed border-ink/30 flex items-center justify-center text-[10px] text-ink/40 leading-none">—</button>
+          <label class="relative w-8 h-8 rounded-full border border-dashed border-ink/30 cursor-pointer flex items-center justify-center text-ink/40 text-xs overflow-hidden">
+            <input id="customBg" type="color" value="#FFFFFF" class="absolute inset-0 opacity-0 cursor-pointer" />
+            +
+          </label>
         </div>
+        <p class="text-xs text-ink/40 mt-2">Ketuk lingkaran + untuk pilih warna apa saja, tanpa batas.</p>
+      </div>
+
+      <div class="mt-7 hidden" id="frameOptions">
+        <p class="text-sm font-medium text-ink/80 mb-3">Warna bingkai</p>
+        <div class="flex flex-wrap items-center gap-3" id="frameColorGroup">
+          <button data-color="#111111" class="frame-swatch active w-8 h-8 rounded-full border border-line" style="background:#111111"></button>
+          <button data-color="#1B9AD6" class="frame-swatch w-8 h-8 rounded-full border border-line" style="background:#1B9AD6"></button>
+          <button data-color="#1B5E3F" class="frame-swatch w-8 h-8 rounded-full border border-line" style="background:#1B5E3F"></button>
+          <button data-color="#D6455B" class="frame-swatch w-8 h-8 rounded-full border border-line" style="background:#D6455B"></button>
+          <label class="relative w-8 h-8 rounded-full border border-dashed border-ink/30 cursor-pointer flex items-center justify-center text-ink/40 text-xs overflow-hidden">
+            <input id="customFrame" type="color" value="#111111" class="absolute inset-0 opacity-0 cursor-pointer" />
+            +
+          </label>
+        </div>
+        <p class="text-xs text-ink/40 mt-2">Warna bingkai bebas dipilih — tidak dibatasi daftar di atas.</p>
+
+        <label class="block text-sm font-medium text-ink/80 mt-5 mb-2" for="labelText">Teks label</label>
+        <input id="labelText" type="text" maxlength="16" value="SCAN ME"
+          class="w-full rounded-xl border border-line bg-paper px-4 py-3 text-ink placeholder:text-ink/35 focus:outline-none focus:ring-2 focus:ring-leaf/50 focus:border-leaf transition uppercase tracking-wide" />
       </div>
 
     </div>
@@ -186,7 +225,7 @@
       <div class="relative rounded-3xl bg-mint/60 dotgrid border border-line p-8 sm:p-10 flex flex-col items-center">
         <div class="absolute -inset-6 rounded-[2rem] bg-leaf/10 blur-2xl -z-10"></div>
         <div class="fade-panel bg-white rounded-2xl p-4 shadow-[0_1px_2px_rgba(15,36,26,0.04),0_16px_40px_-16px_rgba(15,36,26,0.18)]">
-          <canvas id="qrCanvas" class="rounded-xl" style="width:260px;height:260px;"></canvas>
+          <canvas id="qrCanvas" class="rounded-xl block" style="width:260px;height:auto;"></canvas>
         </div>
         <p class="mt-5 text-sm text-ink/55 text-center" id="previewLabel">Pratinjau langsung — akan berubah saat kamu mengatur bentuk dan warna</p>
         <button id="downloadBtn" class="mt-6 inline-flex items-center gap-2 rounded-full bg-forest text-paper text-sm font-medium px-5 py-2.5 hover:bg-leafdark transition">
@@ -271,6 +310,9 @@
     color: '#0F241A',
     gradient: false,
     bg: '#FFFFFF',
+    mode: 'plain',
+    frameColor: '#111111',
+    labelText: 'SCAN ME',
   };
 
   const shapeStyles = {
@@ -289,6 +331,28 @@
     ctx.arcTo(x, y + h, x, y, r);
     ctx.arcTo(x, y, x + w, y, r);
     ctx.closePath();
+  }
+
+  function roundRectCorners(ctx, x, y, w, h, r) {
+    const { tl = 0, tr = 0, br = 0, bl = 0 } = r;
+    ctx.beginPath();
+    ctx.moveTo(x + tl, y);
+    ctx.lineTo(x + w - tr, y);
+    ctx.arcTo(x + w, y, x + w, y + tr, tr);
+    ctx.lineTo(x + w, y + h - br);
+    ctx.arcTo(x + w, y + h, x + w - br, y + h, br);
+    ctx.lineTo(x + bl, y + h);
+    ctx.arcTo(x, y + h, x, y + h - bl, bl);
+    ctx.lineTo(x, y + tl);
+    ctx.arcTo(x, y, x + tl, y, tl);
+    ctx.closePath();
+  }
+
+  function contrastText(hex) {
+    const f = parseInt(hex.slice(1), 16);
+    const r = (f >> 16) & 255, g = (f >> 8) & 255, b = f & 255;
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return lum > 0.6 ? '#0F241A' : '#FFFFFF';
   }
 
   function shade(hex, percent) {
@@ -358,13 +422,7 @@
     ctx.restore();
   }
 
-  function render() {
-    const canvas = document.getElementById('qrCanvas');
-    const ctx = canvas.getContext('2d');
-    const px = 720;
-    canvas.width = px;
-    canvas.height = px;
-
+  function drawQRModules(ctx, originX, originY, size, fillStyle) {
     const text = state.text.trim() || 'https://kotak.app';
     const qr = qrcode(0, 'Q');
     qr.addData(text);
@@ -372,26 +430,9 @@
     const count = qr.getModuleCount();
     const margin = 3.2;
     const total = count + margin * 2;
-    const m = px / total;
+    const m = size / total;
 
-    ctx.clearRect(0, 0, px, px);
-    roundRectPath(ctx, 0, 0, px, px, px * 0.045);
-    ctx.clip();
-
-    if (state.bg !== 'transparent') {
-      ctx.fillStyle = state.bg;
-      ctx.fillRect(0, 0, px, px);
-    }
-
-    let fill = state.color;
-    if (state.gradient) {
-      const g = ctx.createLinearGradient(0, 0, px, px);
-      g.addColorStop(0, shade(state.color, 22));
-      g.addColorStop(1, shade(state.color, -22));
-      fill = g;
-    }
-    ctx.fillStyle = fill;
-
+    ctx.fillStyle = fillStyle;
     const style = shapeStyles[state.shape];
     const isFinderZone = (r, c) =>
       (r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7);
@@ -400,14 +441,92 @@
       for (let c = 0; c < count; c++) {
         if (isFinderZone(r, c)) continue;
         if (qr.isDark(r, c)) {
-          drawModule(ctx, (c + margin) * m, (r + margin) * m, m, style.dot);
+          drawModule(ctx, originX + (c + margin) * m, originY + (r + margin) * m, m, style.dot);
         }
       }
     }
 
     [[0, 0], [0, count - 7], [count - 7, 0]].forEach(([r, c]) => {
-      drawFinder(ctx, (c + margin) * m, (r + margin) * m, m, style.corner);
+      drawFinder(ctx, originX + (c + margin) * m, originY + (r + margin) * m, m, style.corner);
     });
+  }
+
+  function moduleFill(ctx, w, h) {
+    if (!state.gradient) return state.color;
+    const g = ctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, shade(state.color, 22));
+    g.addColorStop(1, shade(state.color, -22));
+    return g;
+  }
+
+  function renderPlain() {
+    const canvas = document.getElementById('qrCanvas');
+    const ctx = canvas.getContext('2d');
+    const px = 720;
+    canvas.width = px;
+    canvas.height = px;
+
+    ctx.clearRect(0, 0, px, px);
+    ctx.save();
+    roundRectPath(ctx, 0, 0, px, px, px * 0.045);
+    ctx.clip();
+
+    if (state.bg !== 'transparent') {
+      ctx.fillStyle = state.bg;
+      ctx.fillRect(0, 0, px, px);
+    }
+
+    drawQRModules(ctx, 0, 0, px, moduleFill(ctx, px, px));
+    ctx.restore();
+  }
+
+  function renderFramed() {
+    const canvas = document.getElementById('qrCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const W = 720;
+    const pad = 34;
+    const qrPanel = W - pad * 2;
+    const gap = 18;
+    const labelH = 168;
+    const outerR = 52;
+    const innerR = 34;
+    const H = pad + qrPanel + gap + labelH;
+
+    canvas.width = W;
+    canvas.height = H;
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.save();
+    roundRectCorners(ctx, 0, 0, W, H, { tl: outerR, tr: outerR, br: outerR, bl: outerR });
+    ctx.clip();
+
+    ctx.fillStyle = state.frameColor;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = '#FFFFFF';
+    roundRectCorners(ctx, pad, pad, qrPanel, qrPanel, { tl: innerR, tr: innerR, br: 0, bl: 0 });
+    ctx.fill();
+
+    drawQRModules(ctx, pad, pad, qrPanel, moduleFill(ctx, qrPanel, qrPanel));
+
+    const labelY = pad + qrPanel + gap;
+    ctx.fillStyle = contrastText(state.frameColor);
+    ctx.font = '700 62px "Space Grotesk", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const label = (state.labelText.trim() || 'SCAN ME').toUpperCase();
+    ctx.fillText(label, W / 2, labelY + (labelH - gap) / 2, W - pad * 2);
+
+    ctx.restore();
+  }
+
+  function render() {
+    if (state.mode === 'framed') {
+      renderFramed();
+    } else {
+      renderPlain();
+    }
   }
 
   // wire up controls
@@ -446,13 +565,51 @@
     render();
   });
 
-  document.querySelectorAll('.bg-btn').forEach((btn) => {
+  document.querySelectorAll('#bgGroup .bg-swatch').forEach((btn) => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.bg-btn').forEach((b) => b.classList.remove('active', 'border-forest'));
-      btn.classList.add('active', 'border-forest');
+      document.querySelectorAll('#bgGroup .bg-swatch').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
       state.bg = btn.dataset.bg;
       render();
     });
+  });
+
+  document.getElementById('customBg').addEventListener('input', (e) => {
+    document.querySelectorAll('#bgGroup .bg-swatch').forEach((b) => b.classList.remove('active'));
+    state.bg = e.target.value;
+    render();
+  });
+
+  document.querySelectorAll('.mode-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mode-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.mode = btn.dataset.mode;
+      document.getElementById('bgSection').classList.toggle('hidden', state.mode === 'framed');
+      document.getElementById('frameOptions').classList.toggle('hidden', state.mode !== 'framed');
+      render();
+    });
+  });
+
+  document.querySelectorAll('#frameColorGroup .frame-swatch').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#frameColorGroup .frame-swatch').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.frameColor = btn.dataset.color;
+      document.getElementById('customFrame').value = btn.dataset.color;
+      render();
+    });
+  });
+
+  document.getElementById('customFrame').addEventListener('input', (e) => {
+    document.querySelectorAll('#frameColorGroup .frame-swatch').forEach((b) => b.classList.remove('active'));
+    state.frameColor = e.target.value;
+    render();
+  });
+
+  document.getElementById('labelText').addEventListener('input', (e) => {
+    state.labelText = e.target.value;
+    render();
   });
 
   document.getElementById('downloadBtn').addEventListener('click', () => {
