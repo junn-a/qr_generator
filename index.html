@@ -50,6 +50,11 @@
   .swatch.active,
   .bg-swatch.active,
   .frame-swatch.active { outline: 2px solid #0F241A; outline-offset: 2px; }
+  .preset-swatch.active {
+    border-color: #1B5E3F;
+    background: #EAF4EC;
+    color: #1B5E3F;
+  }
   .mode-btn.active {
     border-color: #1B5E3F;
     background: #1B5E3F;
@@ -58,6 +63,10 @@
   #qrCanvas { image-rendering: crisp-edges; }
   .fade-panel { animation: fadeIn .5s ease both; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity:1; transform:none;} }
+  #qrPreviewLink { display: block; }
+  #qrPreviewLink[href] { cursor: pointer; }
+  #qrPreviewLink[href]:hover .fade-panel { transform: translateY(-2px); box-shadow: 0 1px 2px rgba(15,36,26,0.04), 0 20px 44px -16px rgba(15,36,26,0.24); }
+  #qrPreviewLink .fade-panel { transition: transform .18s ease, box-shadow .18s ease; }
 </style>
 </head>
 <body class="font-sans text-ink antialiased">
@@ -168,15 +177,37 @@
       <div class="mt-7">
         <p class="text-sm font-medium text-ink/80 mb-3">Warna kode</p>
         <div class="flex flex-wrap items-center gap-3" id="colorGroup">
-          <button data-color="#0F241A" class="swatch active w-8 h-8 rounded-full border border-line" style="background:#0F241A"></button>
-          <button data-color="#1B5E3F" class="swatch w-8 h-8 rounded-full border border-line" style="background:#1B5E3F"></button>
-          <button data-color="#3FA66E" class="swatch w-8 h-8 rounded-full border border-line" style="background:#3FA66E"></button>
-          <button data-color="#0D6E6E" class="swatch w-8 h-8 rounded-full border border-line" style="background:#0D6E6E"></button>
-          <button data-color="#245C36" class="swatch w-8 h-8 rounded-full border border-line" style="background:#245C36"></button>
+          <button data-color="#0F241A" class="swatch color-choice active w-8 h-8 rounded-full border border-line" style="background:#0F241A" title="Hitam"></button>
+          <button data-color="#1B5E3F" class="swatch color-choice w-8 h-8 rounded-full border border-line" style="background:#1B5E3F" title="Forest"></button>
+          <button data-color="#3FA66E" class="swatch color-choice w-8 h-8 rounded-full border border-line" style="background:#3FA66E" title="Leaf"></button>
+          <button data-color="#0D6E6E" class="swatch color-choice w-8 h-8 rounded-full border border-line" style="background:#0D6E6E" title="Teal"></button>
+          <button data-color="#245C36" class="swatch color-choice w-8 h-8 rounded-full border border-line" style="background:#245C36" title="Hijau tua"></button>
           <label class="relative w-8 h-8 rounded-full border border-dashed border-ink/30 cursor-pointer flex items-center justify-center text-ink/40 text-xs overflow-hidden">
             <input id="customColor" type="color" value="#1B5E3F" class="absolute inset-0 opacity-0 cursor-pointer" />
             +
           </label>
+        </div>
+
+        <p class="text-xs font-medium text-ink/50 mt-5 mb-2 uppercase tracking-wide">Warna baku</p>
+        <div class="flex flex-wrap gap-2" id="presetColorGroup">
+          <button data-color="#2563EB" class="preset-swatch color-choice inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink/70 hover:border-forest/50 transition">
+            <span class="w-2.5 h-2.5 rounded-full" style="background:#2563EB"></span>Primary
+          </button>
+          <button data-color="#16A34A" class="preset-swatch color-choice inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink/70 hover:border-forest/50 transition">
+            <span class="w-2.5 h-2.5 rounded-full" style="background:#16A34A"></span>Success
+          </button>
+          <button data-color="#F59E0B" class="preset-swatch color-choice inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink/70 hover:border-forest/50 transition">
+            <span class="w-2.5 h-2.5 rounded-full" style="background:#F59E0B"></span>Warning
+          </button>
+          <button data-color="#DC2626" class="preset-swatch color-choice inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink/70 hover:border-forest/50 transition">
+            <span class="w-2.5 h-2.5 rounded-full" style="background:#DC2626"></span>Danger
+          </button>
+          <button data-color="#0891B2" class="preset-swatch color-choice inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink/70 hover:border-forest/50 transition">
+            <span class="w-2.5 h-2.5 rounded-full" style="background:#0891B2"></span>Info
+          </button>
+          <button data-color="#111827" class="preset-swatch color-choice inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink/70 hover:border-forest/50 transition">
+            <span class="w-2.5 h-2.5 rounded-full" style="background:#111827"></span>Dark
+          </button>
         </div>
 
         <label class="flex items-center gap-2 mt-4 text-sm text-ink/70 cursor-pointer select-none">
@@ -224,13 +255,21 @@
     <div class="lg:sticky lg:top-24">
       <div class="relative rounded-3xl bg-mint/60 dotgrid border border-line p-8 sm:p-10 flex flex-col items-center">
         <div class="absolute -inset-6 rounded-[2rem] bg-leaf/10 blur-2xl -z-10"></div>
-        <div class="fade-panel bg-white rounded-2xl p-4 shadow-[0_1px_2px_rgba(15,36,26,0.04),0_16px_40px_-16px_rgba(15,36,26,0.18)]">
-          <canvas id="qrCanvas" class="rounded-xl block" style="width:260px;height:auto;"></canvas>
-        </div>
+        <a id="qrPreviewLink" target="_blank" rel="noopener" title="Klik untuk membuka link">
+          <div class="fade-panel bg-white rounded-2xl p-4 shadow-[0_1px_2px_rgba(15,36,26,0.04),0_16px_40px_-16px_rgba(15,36,26,0.18)]">
+            <canvas id="qrCanvas" class="rounded-xl block" style="width:260px;height:auto;"></canvas>
+          </div>
+        </a>
         <p class="mt-5 text-sm text-ink/55 text-center" id="previewLabel">Pratinjau langsung — akan berubah saat kamu mengatur bentuk dan warna</p>
-        <button id="downloadBtn" class="mt-6 inline-flex items-center gap-2 rounded-full bg-forest text-paper text-sm font-medium px-5 py-2.5 hover:bg-leafdark transition">
-          Unduh PNG
-        </button>
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <button id="downloadBtn" class="inline-flex items-center gap-2 rounded-full bg-forest text-paper text-sm font-medium px-5 py-2.5 hover:bg-leafdark transition">
+            Unduh PNG
+          </button>
+          <button id="downloadSvgBtn" class="inline-flex items-center gap-2 rounded-full border border-forest text-forest text-sm font-medium px-5 py-2.5 hover:bg-forest hover:text-paper transition">
+            Unduh SVG
+          </button>
+        </div>
+        <p class="mt-3 text-xs text-ink/40 text-center max-w-xs">File SVG menyematkan link tujuan — saat dibuka di peramban, gambar QR bisa langsung diklik.</p>
       </div>
     </div>
 
@@ -258,15 +297,15 @@
           </svg>
         </div>
         <h3 class="font-display font-semibold">Empat gaya, warna bebas</h3>
-        <p class="text-sm text-ink/65 mt-2 leading-relaxed">Dari kotak klasik sampai titik bulat yang lebih lembut, padukan dengan warna hijau favorit atau warna brand sendiri.</p>
+        <p class="text-sm text-ink/65 mt-2 leading-relaxed">Dari kotak klasik sampai titik bulat yang lebih lembut, padukan dengan warna hijau favorit, warna baku, atau warna brand sendiri.</p>
       </div>
 
       <div class="bg-white rounded-2xl border border-line p-6">
         <div class="w-9 h-9 rounded-lg bg-forest/10 flex items-center justify-center mb-4">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1v10M5 8l4 4 4-4M2 15h14" stroke="#1B5E3F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <h3 class="font-display font-semibold">Unduh resolusi tinggi</h3>
-        <p class="text-sm text-ink/65 mt-2 leading-relaxed">Hasil PNG tajam, siap ditempel di kemasan, poster, atau kartu nama tanpa pecah.</p>
+        <h3 class="font-display font-semibold">Unduh PNG atau SVG</h3>
+        <p class="text-sm text-ink/65 mt-2 leading-relaxed">PNG tajam untuk kemasan dan cetak, atau SVG dengan link tertanam yang bisa langsung diklik saat dibuka di peramban.</p>
       </div>
 
     </div>
@@ -290,7 +329,7 @@
     <div>
       <span class="font-display text-sm text-leafdark">03</span>
       <h3 class="font-display font-semibold mt-2">Unduh & pakai</h3>
-      <p class="text-sm text-ink/65 mt-2 leading-relaxed">Simpan sebagai gambar PNG dan tempel di mana saja kamu butuhkan.</p>
+      <p class="text-sm text-ink/65 mt-2 leading-relaxed">Simpan sebagai PNG atau SVG dan tempel di mana saja kamu butuhkan.</p>
     </div>
   </div>
 </section>
@@ -422,11 +461,15 @@
     ctx.restore();
   }
 
-  function drawQRModules(ctx, originX, originY, size, fillStyle) {
-    const text = state.text.trim() || 'https://kotak.app';
+  function getQrCode(text) {
     const qr = qrcode(0, 'Q');
-    qr.addData(text);
+    qr.addData(text.trim() || 'https://kotak.app');
     qr.make();
+    return qr;
+  }
+
+  function drawQRModules(ctx, originX, originY, size, fillStyle) {
+    const qr = getQrCode(state.text);
     const count = qr.getModuleCount();
     const margin = 3.2;
     const total = count + margin * 2;
@@ -521,12 +564,146 @@
     ctx.restore();
   }
 
+  function updatePreviewLink() {
+    const link = document.getElementById('qrPreviewLink');
+    const url = state.text.trim();
+    if (url) {
+      link.setAttribute('href', url);
+    } else {
+      link.removeAttribute('href');
+    }
+  }
+
   function render() {
     if (state.mode === 'framed') {
       renderFramed();
     } else {
       renderPlain();
     }
+    updatePreviewLink();
+  }
+
+  // ---------- SVG export ----------
+  function svgEscape(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function pathRoundRectCorners(x, y, w, h, r) {
+    const { tl = 0, tr = 0, br = 0, bl = 0 } = r;
+    return `M${x + tl},${y} H${x + w - tr} A${tr},${tr} 0 0 1 ${x + w},${y + tr} V${y + h - br} A${br},${br} 0 0 1 ${x + w - br},${y + h} H${x + bl} A${bl},${bl} 0 0 1 ${x},${y + h - bl} V${y + tl} A${tl},${tl} 0 0 1 ${x + tl},${y} Z`;
+  }
+
+  function svgModule(x, y, size, style, fill) {
+    const pad = style === 'square' ? 0 : size * 0.08;
+    switch (style) {
+      case 'square':
+        return `<rect x="${x}" y="${y}" width="${size}" height="${size}" fill="${fill}"/>`;
+      case 'rounded':
+        return `<rect x="${x + pad}" y="${y + pad}" width="${size - 2 * pad}" height="${size - 2 * pad}" rx="${size * 0.32}" ry="${size * 0.32}" fill="${fill}"/>`;
+      case 'circle':
+        return `<circle cx="${x + size / 2}" cy="${y + size / 2}" r="${(size - 2 * pad) / 2}" fill="${fill}"/>`;
+      case 'diamond': {
+        const p1 = `${x + size / 2},${y + pad}`;
+        const p2 = `${x + size - pad},${y + size / 2}`;
+        const p3 = `${x + size / 2},${y + size - pad}`;
+        const p4 = `${x + pad},${y + size / 2}`;
+        return `<polygon points="${p1} ${p2} ${p3} ${p4}" fill="${fill}"/>`;
+      }
+      default:
+        return '';
+    }
+  }
+
+  function svgFinder(x, y, m, style, fill) {
+    const total = m * 7;
+    const cx = x + total / 2, cy = y + total / 2;
+    if (style === 'square') {
+      return `<rect x="${x + m / 2}" y="${y + m / 2}" width="${total - m}" height="${total - m}" fill="none" stroke="${fill}" stroke-width="${m}"/>` +
+             `<rect x="${x + 2 * m}" y="${y + 2 * m}" width="${3 * m}" height="${3 * m}" fill="${fill}"/>`;
+    }
+    if (style === 'rounded') {
+      return `<rect x="${x + m}" y="${y + m}" width="${total - 2 * m}" height="${total - 2 * m}" rx="${m * 1.5}" ry="${m * 1.5}" fill="none" stroke="${fill}" stroke-width="${m}"/>` +
+             `<rect x="${x + 2 * m}" y="${y + 2 * m}" width="${3 * m}" height="${3 * m}" rx="${m * 0.9}" ry="${m * 0.9}" fill="${fill}"/>`;
+    }
+    if (style === 'circle') {
+      return `<circle cx="${cx}" cy="${cy}" r="${(total - m) / 2}" fill="none" stroke="${fill}" stroke-width="${m}"/>` +
+             `<circle cx="${cx}" cy="${cy}" r="${1.5 * m}" fill="${fill}"/>`;
+    }
+    return '';
+  }
+
+  function svgQrModules(originX, originY, size, fillRef) {
+    const qr = getQrCode(state.text);
+    const count = qr.getModuleCount();
+    const margin = 3.2;
+    const total = count + margin * 2;
+    const m = size / total;
+    const style = shapeStyles[state.shape];
+    const isFinderZone = (r, c) =>
+      (r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7);
+
+    let out = '';
+    for (let r = 0; r < count; r++) {
+      for (let c = 0; c < count; c++) {
+        if (isFinderZone(r, c)) continue;
+        if (qr.isDark(r, c)) {
+          out += svgModule(originX + (c + margin) * m, originY + (r + margin) * m, m, style.dot, fillRef);
+        }
+      }
+    }
+    [[0, 0], [0, count - 7], [count - 7, 0]].forEach(([r, c]) => {
+      out += svgFinder(originX + (c + margin) * m, originY + (r + margin) * m, m, style.corner, fillRef);
+    });
+    return out;
+  }
+
+  function buildSvgMarkup() {
+    const url = state.text.trim() || 'https://kotak.app';
+    const gradId = 'qrGrad';
+    let defs = '';
+    let fillRef = state.color;
+    if (state.gradient) {
+      fillRef = `url(#${gradId})`;
+      defs = `<defs><linearGradient id="${gradId}" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="${shade(state.color, 22)}"/>
+        <stop offset="1" stop-color="${shade(state.color, -22)}"/>
+      </linearGradient></defs>`;
+    }
+
+    let body = '';
+    let W = 720, H = 720;
+
+    if (state.mode === 'framed') {
+      const pad = 34, gap = 18, labelH = 168, outerR = 52, innerR = 34;
+      const qrPanel = W - pad * 2;
+      H = pad + qrPanel + gap + labelH;
+      const framePath = pathRoundRectCorners(0, 0, W, H, { tl: outerR, tr: outerR, br: outerR, bl: outerR });
+      const panelPath = pathRoundRectCorners(pad, pad, qrPanel, qrPanel, { tl: innerR, tr: innerR, br: 0, bl: 0 });
+      const labelY = pad + qrPanel + gap + (labelH - gap) / 2;
+      const textColor = contrastText(state.frameColor);
+      const label = svgEscape((state.labelText.trim() || 'SCAN ME').toUpperCase());
+
+      body = `<path d="${framePath}" fill="${state.frameColor}"/>` +
+             `<path d="${panelPath}" fill="#FFFFFF"/>` +
+             svgQrModules(pad, pad, qrPanel, fillRef) +
+             `<text x="${W / 2}" y="${labelY}" text-anchor="middle" dominant-baseline="middle" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="62" fill="${textColor}">${label}</text>`;
+    } else {
+      const r = W * 0.045;
+      const bgFill = state.bg === 'transparent' ? null : state.bg;
+      body = (bgFill ? `<rect x="0" y="0" width="${W}" height="${H}" rx="${r}" ry="${r}" fill="${bgFill}"/>` : '') +
+             svgQrModules(0, 0, W, fillRef);
+    }
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
+  ${defs}
+  <a href="${svgEscape(url)}" xlink:href="${svgEscape(url)}" target="_blank" rel="noopener">
+    ${body}
+  </a>
+</svg>`;
   }
 
   // wire up controls
@@ -544,9 +721,23 @@
     });
   });
 
-  document.querySelectorAll('#colorGroup .swatch').forEach((btn) => {
+  function clearColorActive() {
+    document.querySelectorAll('.color-choice').forEach((b) => b.classList.remove('active'));
+  }
+
+  document.querySelectorAll('#colorGroup .swatch.color-choice').forEach((btn) => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#colorGroup .swatch').forEach((b) => b.classList.remove('active'));
+      clearColorActive();
+      btn.classList.add('active');
+      state.color = btn.dataset.color;
+      document.getElementById('customColor').value = btn.dataset.color;
+      render();
+    });
+  });
+
+  document.querySelectorAll('#presetColorGroup .preset-swatch').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      clearColorActive();
       btn.classList.add('active');
       state.color = btn.dataset.color;
       document.getElementById('customColor').value = btn.dataset.color;
@@ -555,7 +746,7 @@
   });
 
   document.getElementById('customColor').addEventListener('input', (e) => {
-    document.querySelectorAll('#colorGroup .swatch').forEach((b) => b.classList.remove('active'));
+    clearColorActive();
     state.color = e.target.value;
     render();
   });
@@ -618,6 +809,17 @@
     link.download = 'kotak-qr.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
+  });
+
+  document.getElementById('downloadSvgBtn').addEventListener('click', () => {
+    const svgMarkup = buildSvgMarkup();
+    const blob = new Blob([svgMarkup], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = 'kotak-qr.svg';
+    link.href = url;
+    link.click();
+    URL.revokeObjectURL(url);
   });
 
   render();
