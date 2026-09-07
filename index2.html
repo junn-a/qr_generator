@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Shortener</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+    body { max-width: 600px; margin: 40px auto; padding: 0 16px; background: #f9f9f9; color: #333; }
+    .card { background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h1 { margin-top: 0; font-size: 1.5rem; }
+    form { display: flex; gap: 8px; margin-bottom: 24px; }
+    input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 10px 16px; background: #0066cc; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #0052a3; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+    .links { display: flex; flex-direction: column; gap: 4px; }
+    .short { font-weight: bold; color: #0066cc; text-decoration: none; }
+    .original { font-size: 0.85rem; color: #666; word-break: break-all; }
+    .btn-del { background: #dc3545; padding: 6px 12px; font-size: 0.85rem; }
+    .btn-del:hover { background: #a71d2a; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>URL Shortener</h1>
+    <form id="shortener-form">
+      <input type="url" id="long-url" placeholder="Paste URL panjang di sini..." required>
+      <button type="submit">Shorten</button>
+    </form>
+
+    <h2>Daftar Link</h2>
+    <ul id="link-list"></ul>
+  </div>
+
+  <script>
+    // 1. Logika Pengalihan (Redirect) jika ada parameter hash/path
+    const path = window.location.hash.substring(1); // Menggunakan hash (#code) agar mudah di GitHub Pages
+    const links = JSON.parse(localStorage.getItem('short_urls') || '{}');
+
+    if (path && links[path]) {
+      window.location.href = links[path];
+    }
+
+    // 2. Element DOM
+    const form = document.getElementById('shortener-form');
+    const inputUrl = document.getElementById('long-url');
+    const linkList = document.getElementById('link-list');
+
+    // Helper: Generate kode acak 5 karakter
+    function generateCode() {
+      return Math.random().toString(36).substring(2, 7);
+    }
+
+    // Render daftar link dari LocalStorage
+    function renderLinks() {
+      linkList.innerHTML = '';
+      const baseUrl = window.location.origin + window.location.pathname;
+
+      Object.keys(links).reverse().forEach(code => {
+        const fullShortUrl = `${baseUrl}#${code}`;
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div class="links">
+            <a href="${fullShortUrl}" target="_blank" class="short">${fullShortUrl}</a>
+            <span class="original">${links[code]}</span>
+          </div>
+          <button class="btn-del" onclick="deleteLink('${code}')">Hapus</button>
+        `;
+        linkList.appendChild(li);
+      });
+    }
+
+    // Tambah link baru
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const longUrl = inputUrl.value.trim();
+      const code = generateCode();
+
+      links[code] = longUrl;
+      localStorage.setItem('short_urls', JSON.stringify(links));
+      
+      inputUrl.value = '';
+      renderLinks();
+    });
+
+    // Hapus link
+    window.deleteLink = function(code) {
+      delete links[code];
+      localStorage.setItem('short_urls', JSON.stringify(links));
+      renderLinks();
+    };
+
+    // Render awal
+    renderLinks();
+  </script>
+</body>
+</html>
