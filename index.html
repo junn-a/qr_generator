@@ -112,11 +112,15 @@
     <!-- CONTROLS -->
     <div class="bg-white border border-line rounded-3xl p-6 sm:p-8">
 
-      <label class="block text-sm font-medium text-ink/80 mb-2" for="urlInput">Link tujuan</label>
+      <div class="flex items-center justify-between mb-2">
+        <label class="block text-sm font-medium text-ink/80" for="urlInput">Link tujuan</label>
+        <button id="resetStateBtn" type="button" class="text-xs text-ink/40 hover:text-ink/70 underline underline-offset-2 transition">Reset pengaturan</button>
+      </div>
       <input id="urlInput" type="text" placeholder="https://contohtoko.com/menu"
         class="w-full rounded-xl border border-line bg-paper px-4 py-3 text-ink placeholder:text-ink/35 focus:outline-none focus:ring-2 focus:ring-leaf/50 focus:border-leaf transition" />
+      <p id="savedNote" class="mt-2 text-xs text-leafdark opacity-0 transition-opacity duration-300">Tersimpan otomatis di perangkat ini</p>
 
-      <div class="mt-7">
+      <div class="mt-5">
         <p class="text-sm font-medium text-ink/80 mb-3">Gaya tampilan</p>
         <div class="flex gap-3" id="modeGroup">
           <button data-mode="plain" class="mode-btn active flex-1 rounded-xl border border-line py-2.5 text-sm font-medium hover:border-forest/50 transition">Polos</button>
@@ -343,6 +347,8 @@
 </footer>
 
 <script>
+  const STORAGE_KEY = 'nextgenQrState';
+
   const state = {
     text: '',
     shape: 'classic',
@@ -353,6 +359,79 @@
     frameColor: '#111111',
     labelText: 'SCAN ME',
   };
+
+  // ---------- localStorage persistence ----------
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      flashSavedNote();
+    } catch (e) {
+      // localStorage bisa gagal (mode private/penuh) — abaikan, generator tetap jalan
+    }
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        Object.assign(state, saved);
+      }
+    } catch (e) {
+      // data tersimpan rusak/tidak valid — pakai state default
+    }
+  }
+
+  function clearSavedState() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
+  }
+
+  let savedNoteTimer = null;
+  function flashSavedNote() {
+    const note = document.getElementById('savedNote');
+    if (!note) return;
+    note.style.opacity = '1';
+    clearTimeout(savedNoteTimer);
+    savedNoteTimer = setTimeout(() => { note.style.opacity = '0'; }, 1200);
+  }
+
+  // Menyamakan tampilan kontrol (input, tombol aktif) dengan state yang baru dimuat
+  function applyStateToUI() {
+    document.getElementById('urlInput').value = state.text || '';
+
+    document.querySelectorAll('.shape-btn').forEach((b) => {
+      b.classList.toggle('active', b.dataset.shape === state.shape);
+    });
+
+    document.querySelectorAll('.color-choice').forEach((b) => b.classList.remove('active'));
+    const matchedSwatch = document.querySelector(`.color-choice[data-color="${state.color}"]`);
+    if (matchedSwatch) matchedSwatch.classList.add('active');
+    document.getElementById('customColor').value = state.color;
+
+    document.getElementById('gradientToggle').checked = !!state.gradient;
+
+    document.querySelectorAll('#bgGroup .bg-swatch').forEach((b) => {
+      b.classList.toggle('active', b.dataset.bg === state.bg);
+    });
+    if (state.bg !== 'transparent') {
+      document.getElementById('customBg').value = state.bg;
+    }
+
+    document.querySelectorAll('.mode-btn').forEach((b) => {
+      b.classList.toggle('active', b.dataset.mode === state.mode);
+    });
+    document.getElementById('bgSection').classList.toggle('hidden', state.mode === 'framed');
+    document.getElementById('frameOptions').classList.toggle('hidden', state.mode !== 'framed');
+
+    document.querySelectorAll('#frameColorGroup .frame-swatch').forEach((b) => {
+      b.classList.toggle('active', b.dataset.color === state.frameColor);
+    });
+    document.getElementById('customFrame').value = state.frameColor;
+
+    document.getElementById('labelText').value = state.labelText || 'SCAN ME';
+  }
 
   const shapeStyles = {
     classic: { dot: 'square',  corner: 'square'  },
@@ -581,6 +660,7 @@
       renderPlain();
     }
     updatePreviewLink();
+    saveState();
   }
 
   // ---------- SVG export ----------
@@ -822,6 +902,25 @@
     URL.revokeObjectURL(url);
   });
 
+  document.getElementById('resetStateBtn').addEventListener('click', () => {
+    clearSavedState();
+    Object.assign(state, {
+      text: '',
+      shape: 'classic',
+      color: '#0F241A',
+      gradient: false,
+      bg: '#FFFFFF',
+      mode: 'plain',
+      frameColor: '#111111',
+      labelText: 'SCAN ME',
+    });
+    applyStateToUI();
+    render();
+  });
+
+  // init: muat pengaturan tersimpan (jika ada), samakan UI, lalu render
+  loadState();
+  applyStateToUI();
   render();
 </script>
 
